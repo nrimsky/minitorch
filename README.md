@@ -23,3 +23,5 @@ pip install -Ue .
 ```bash
 pytest -m task-id # e.g. `pytest -m task0_1` for section with note "pass tests marked as task0_1"
 ```
+
+_Remember to activate the virtual environment first (`source venv/bin/activate` or `source venv/Scripts/activate` on Windows) before running the tests._
