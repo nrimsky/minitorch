@@ -12,7 +12,7 @@
 git clone https://github.com/minitorch/minitorch  # or your/my fork, e.g. https://github.com/nrimsky/minitorch
 cd minitorch
 python3 -m venv venv
-source venv/bin/activate  # source venv/Scripts/activate on Windows Git Bash or cmd
+source venv/bin/activate  # venv\Scripts\activate on Windows
 pip install -r requirements.txt
 pip install -r requirements.extra.txt
 pip install -Ue .
@@ -24,4 +24,4 @@ pip install -Ue .
 pytest -m task-id # e.g. `pytest -m task0_1` for section with note "pass tests marked as task0_1"
 ```
 
-_Remember to activate the virtual environment first (`source venv/bin/activate` or `source venv/Scripts/activate` on Windows) before running the tests._
+_Remember to activate the virtual environment first (`source venv/bin/activate` or `venv\Scripts\activate` on Windows) before running the tests._
