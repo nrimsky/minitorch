@@ -6,6 +6,7 @@ import minitorch
 from minitorch import TensorData
 
 from .tensor_strategies import indices, tensor_data
+from minitorch.tensor_data import to_index
 
 # ## Tasks 2.1
 
@@ -88,6 +89,44 @@ def test_permute(data: DataObject) -> None:
     td2 = td_rev.permute(*list(reversed(range(td_rev.dims))))
     assert td.index(ind) == td2.index(ind)
 
+@pytest.mark.task2_1
+def test_ordinal_out_of_range():
+    shape = (2, 2)
+    out_index = [0, 0]
+
+    # If ordinal is out of range (size of tensor is 4 for 2x2), it should raise an error.
+    with pytest.raises(ValueError):
+        to_index(4, shape, out_index)
+
+@pytest.mark.task2_1
+def test_valid_conversion():
+    shape = (2, 2)
+    out_index = [0, 0]
+    to_index(0, shape, out_index)
+    assert out_index == [0, 0]
+
+    to_index(1, shape, out_index)
+    assert out_index == [0, 1]
+
+    to_index(2, shape, out_index)
+    assert out_index == [1, 0]
+
+    to_index(3, shape, out_index)
+    assert out_index == [1, 1]
+
+@pytest.mark.task2_1
+def test_enumeration_coverage():
+    shape = (3, 3)
+    all_indices = set()
+
+    for i in range(9):  # as 3x3 = 9
+        out_index = [0, 0]
+        to_index(i, shape, out_index)
+        all_indices.add(tuple(out_index))
+
+    # Ensure that all positions from 0 to 8 inclusive produce unique indices
+    assert len(all_indices) == 9
+
 
 # ## Tasks 2.2
 
@@ -119,6 +158,37 @@ def test_shape_broadcast() -> None:
     c = minitorch.shape_broadcast((2, 5), (5,))
     assert c == (2, 5)
 
+    c = minitorch.shape_broadcast((2, 5), (1, 5))
+    assert c == (2, 5)
+
+    c = minitorch.shape_broadcast((2, 5), (2, 1))
+    assert c == (2, 5)
+
+@pytest.mark.task2_2
+def test_broadcast_index():
+    c = [0]
+    minitorch.broadcast_index((2, 3), (5, 5), (1,), c)
+    assert c == [0]
+
+    c = [0]
+    minitorch.broadcast_index((2, 3), (5, 5), (5,), c)
+    assert c == [3]
+
+    c = [0, 0]
+    minitorch.broadcast_index((1, 2, 3), (1, 5, 5), (5, 5), c)
+    assert c == [2, 3]
+
+    c = [0, 0, 0, 0]
+    minitorch.broadcast_index((4, 3, 2, 1), (5, 5, 4, 4), (5, 5, 1, 1), c)
+    assert c == [4, 3, 0, 0]
+
+    c = [0]
+    minitorch.broadcast_index((3,), (5,), (1,), c)
+    assert c == [0]
+
+    c = [0, 0, 0]
+    minitorch.broadcast_index((1, 2, 3), (2, 5, 5), (1, 5, 5), c)
+    assert c == [0, 2, 3]
 
 @given(tensor_data())
 def test_string(tensor_data: TensorData) -> None:

@@ -77,11 +77,11 @@ def topological_sort(variable: Variable) -> Iterable[Variable]:
 
 def backpropagate(variable: Variable, deriv: Any) -> None:
     derivative_dict = defaultdict(float)
-    derivative_dict[variable.unique_id] = float(deriv)
+    derivative_dict[variable.unique_id] = deriv
     topo_order = topological_sort(variable)
 
     for node in topo_order:
-        if not node.is_leaf():
+        if not node.is_leaf() and not node.is_constant():
             for parent, d_parent in node.chain_rule(derivative_dict[node.unique_id]):
                 if parent.is_leaf():
                     parent.accumulate_derivative(d_parent)

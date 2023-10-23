@@ -82,8 +82,14 @@ class TensorBackend:
         self.eq_zip = ops.zip(operators.eq)
         self.is_close_zip = ops.zip(operators.is_close)
         self.relu_back_zip = ops.zip(operators.relu_back)
+        self.sigmoid_back_zip = ops.zip(operators.sigmoid_back)
         self.log_back_zip = ops.zip(operators.log_back)
         self.inv_back_zip = ops.zip(operators.inv_back)
+        self.exp_back_zip = ops.zip(operators.exp_back)
+        self.lt_zip = ops.zip(operators.lt)
+        self.gt_zip = ops.zip(operators.gt)
+        self.eq_zip = ops.zip(operators.eq)
+        self.isclose_zip = ops.zip(operators.is_close)
 
         # Reduce
         self.add_reduce = ops.reduce(operators.add, 0.0)
@@ -229,6 +235,20 @@ class SimpleOps(TensorOps):
 
 # Implementations.
 
+def out_pos_to_in_pos(out_pos: int, out_shape: Shape, out_strides: Strides, in_shape: Shape, in_strides: Strides) -> int:
+    """
+    1. Convert flat out_pos to multi-dimensional index for out_shape using out_strides
+    2. Broadcast index to in_shape
+    3. Convert multi-dimensional index to flat in_pos using in_strides
+    """
+    out_idx = []
+    for i in range(len(out_shape)):
+        out_idx.append(out_pos // out_strides[i])
+        out_pos = out_pos % out_strides[i]
+    in_idx = [0] * len(in_shape)
+    broadcast_index(out_idx, out_shape, in_shape, in_idx)
+    return index_to_position(in_idx, in_strides)
+    
 
 def tensor_map(
     fn: Callable[[float], float]
@@ -264,9 +284,9 @@ def tensor_map(
         in_shape: Shape,
         in_strides: Strides,
     ) -> None:
-        # TODO: Implement for Task 2.3.
-        raise NotImplementedError('Need to implement for Task 2.3')
-
+        for out_pos in range(len(out)):
+            in_pos = out_pos_to_in_pos(out_pos, out_shape, out_strides, in_shape, in_strides)
+            out[out_pos] = fn(in_storage[in_pos])
     return _map
 
 
@@ -309,9 +329,10 @@ def tensor_zip(
         b_shape: Shape,
         b_strides: Strides,
     ) -> None:
-        # TODO: Implement for Task 2.3.
-        raise NotImplementedError('Need to implement for Task 2.3')
-
+        for out_pos in range(len(out)):
+            in_pos_a = out_pos_to_in_pos(out_pos, out_shape, out_strides, a_shape, a_strides)
+            in_pos_b = out_pos_to_in_pos(out_pos, out_shape, out_strides, b_shape, b_strides)
+            out[out_pos] = fn(a_storage[in_pos_a], b_storage[in_pos_b])
     return _zip
 
 
@@ -340,10 +361,13 @@ def tensor_reduce(
         a_strides: Strides,
         reduce_dim: int,
     ) -> None:
-        # TODO: Implement for Task 2.3.
-        raise NotImplementedError('Need to implement for Task 2.3')
-
+        for out_pos in range(len(out)):
+            in_pos = out_pos_to_in_pos(out_pos, out_shape, out_strides, a_shape, a_strides)
+            for i in range(a_shape[reduce_dim]):
+                if i == 0:
+                    out[out_pos] = a_storage[in_pos]
+                else:
+                    out[out_pos] = fn(out[out_pos], a_storage[in_pos + i * a_strides[reduce_dim]])
     return _reduce
-
 
 SimpleBackend = TensorBackend(SimpleOps)

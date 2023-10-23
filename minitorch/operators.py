@@ -34,6 +34,10 @@ def lt(x: float, y: float) -> float:
     "$f(x) =$ 1.0 if x is less than y else 0.0"
     return 1.0 if x < y else 0.0
 
+def gt(x: float, y: float) -> float:
+    "$f(x) =$ 1.0 if x is greater than y else 0.0"
+    return 1.0 if x > y else 0.0
+
 
 def eq(x: float, y: float) -> float:
     "$f(x) =$ 1.0 if x is equal to y else 0.0"
@@ -108,6 +112,14 @@ def inv_back(x: float, d: float) -> float:
 def relu_back(x: float, d: float) -> float:
     r"If $f = relu$ compute $d \times f'(x)$"
     return d if x > 0 else 0.0
+
+def sigmoid_back(x: float, d: float) -> float:
+    r"If $f = sigmoid$ compute $d \times f'(x)$"
+    return d * sigmoid(x) * (1 - sigmoid(x))
+
+def exp_back(x: float, d: float) -> float:
+    r"If $f = exp$ compute $d \times f'(x)$"
+    return d * exp(x)
 
 
 # ## Task 0.3

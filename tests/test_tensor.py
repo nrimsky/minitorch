@@ -5,6 +5,7 @@ from hypothesis import given
 from hypothesis.strategies import DataObject, data, lists, permutations
 
 from minitorch import MathTestVariable, Tensor, grad_check, tensor
+from minitorch.tensor_ops import out_pos_to_in_pos
 
 from .strategies import assert_close, small_floats
 from .tensor_strategies import shaped_tensors, tensors
@@ -18,7 +19,6 @@ def test_create(t1: List[float]) -> None:
     t2 = tensor(t1)
     for i in range(len(t1)):
         assert t1[i] == t2[i]
-
 
 @given(tensors())
 @pytest.mark.task2_3
